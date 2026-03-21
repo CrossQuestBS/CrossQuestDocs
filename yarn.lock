@@ -3045,6 +3045,11 @@ space-separated-tokens@^2.0.0:
   resolved "https://registry.yarnpkg.com/space-separated-tokens/-/space-separated-tokens-2.0.2.tgz#1ecd9d2350a3844572c3f4a312bceb018348859f"
   integrity sha512-PEGlAwrG8yXGXRjW32fGbg66JAlOAwbObuqVoJpv/mRgoWDQfgH1wDPvtzWyUSNAXBGSk8h755YDbbcEy3SH2Q==
 
+starlight-theme-flexoki@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/starlight-theme-flexoki/-/starlight-theme-flexoki-0.2.2.tgz#517bbba49a8c52bc4669cbef5552fe1d979736e0"
+  integrity sha512-WIgWwRqK5m1fhzcKJ+dSQ31puY6NW8HoYvSLL3EOPp9QlNXaX2QxjiViR9nIpWUbo3rq+6HqY//WJid19F3QWQ==
+
 stream-replace-string@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/stream-replace-string/-/stream-replace-string-2.0.0.tgz#e49fd584bd1c633613e010bc73b9db49cb5024ad"
