@@ -6,6 +6,7 @@ import expressiveCode from 'astro-expressive-code';
 // https://astro.build/config
 export default defineConfig({
     site: 'https://crossquestbs.github.io',
+    base: "/CrossQuestDocs",
     integrations: [expressiveCode(),starlight({
         plugins: [starlightThemeFlexoki({accentColor: "purple"})],
 	
