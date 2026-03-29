@@ -957,7 +957,7 @@ astring@^1.8.0:
   resolved "https://registry.yarnpkg.com/astring/-/astring-1.9.0.tgz#cc73e6062a7eb03e7d19c22d8b0b3451fd9bfeef"
   integrity sha512-LElXdjswlqjWrPpJFg1Fx4wpkOCxj1TDHlSV4PlaRxHGWko024xICaa97ZkMfs6DRKlCguiAI+rbXv5GWwXIkg==
 
-astro-expressive-code@^0.41.6:
+astro-expressive-code@^0.41.6, astro-expressive-code@^0.41.7:
   version "0.41.7"
   resolved "https://registry.yarnpkg.com/astro-expressive-code/-/astro-expressive-code-0.41.7.tgz#82c7edf21274c85de1aea73ba3fe437c02c53bb2"
   integrity sha512-hUpogGc6DdAd+I7pPXsctyYPRBJDK7Q7d06s4cyP0Vz3OcbziP3FNzN0jZci1BpCvLn9675DvS7B9ctKKX64JQ==
