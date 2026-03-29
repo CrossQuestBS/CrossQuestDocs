@@ -5,6 +5,7 @@ import starlightThemeFlexoki from 'starlight-theme-flexoki'
 import expressiveCode from 'astro-expressive-code';
 // https://astro.build/config
 export default defineConfig({
+    site: 'https://crossquestbs.github.io',
     integrations: [expressiveCode(),starlight({
         plugins: [starlightThemeFlexoki({accentColor: "purple"})],
 	
