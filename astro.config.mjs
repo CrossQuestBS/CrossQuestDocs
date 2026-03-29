@@ -9,7 +9,6 @@ export default defineConfig({
     base: "/CrossQuestDocs",
     integrations: [expressiveCode(),starlight({
         plugins: [starlightThemeFlexoki({accentColor: "purple"})],
-	
         title: 'CrossQuest',
         social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/CrossQuestBS' }],
         sidebar: [
