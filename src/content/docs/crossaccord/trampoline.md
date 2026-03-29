@@ -26,13 +26,6 @@ namespace BeatSaberQuestPatch.Build;
 [AccordTrampolineBuild(typeof(BeatSaberInit), "get_settingsApplicator", typeof(BeatSaberInitTrampoline))]
 public class BeatSaberInitTrampolineBuild : IAccordTrampolineBuild
 {
-    /*
-     *    // [56 59 - 56 93]
-        IL_0000: ldarg.0      // this
-        IL_0001: ldfld        class [Main]SettingsApplicatorSO BeatSaberInit::_standaloneSettingsApplicator
-        IL_0006: ret
-     */
-    
     public bool StartOffset(Instruction instructions)
     {
         return instructions.OpCode == OpCodes.Ldarg_0;
