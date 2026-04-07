@@ -15,71 +15,86 @@ IL Trampoline is a bit like transpilers, but instead of directly changing the IL
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BeatSaberQuestPatch.Patches.Trampoline;
+using AsmResolver.DotNet;
+using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.PE.DotNet.Cil;
 using CrossAccord.ILTrampoline.Attributes;
 using CrossAccord.ILTrampoline.Interfaces;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
+using MappingExtensions.Patches.Trampoline;
 
-namespace BeatSaberQuestPatch.Build;
+namespace MappingExtensions.Build;
 
-[AccordTrampolineBuild(typeof(BeatSaberInit), "get_settingsApplicator", typeof(BeatSaberInitTrampoline))]
-public class BeatSaberInitTrampolineBuild : IAccordTrampolineBuild
+[AccordTrampolineBuild(
+    declaringType: typeof(BeatmapObjectsInTimeRowProcessor), 
+    methodName: nameof(BeatmapObjectsInTimeRowProcessor.HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlice), 
+    arguments: [typeof(BeatmapObjectsInTimeRowProcessor.TimeSliceContainer<BeatmapDataItem>), typeof(float)], 
+    trampolinePatch: typeof(HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlicePatch))
+]
+public class HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlicePatchBuild : IAccordTrampolineBuild
 {
-    public bool StartOffset(Instruction instructions)
+    public IEnumerable<Func<CilInstruction, CilMatch>> MatchInstructions()
     {
-        return instructions.OpCode == OpCodes.Ldarg_0;
+        yield return instruction => 
+            instruction.OpCode == CilOpCodes.Ldarg_0 ? CilMatch.Strict : CilMatch.None;
+        yield return (instruction =>
+        {
+            if (instruction.OpCode != CilOpCodes.Ldfld ||
+                instruction.Operand is not IFieldDescriptor fieldDescriptor)
+                return CilMatch.None;
+            
+            return fieldDescriptor.Name == "_notesInColumnsReusableProcessingListOfLists" ? CilMatch.Strict : CilMatch.None;
+        });
+        yield return instruction => 
+            instruction.OpCode == CilOpCodes.Ldloc_S ? CilMatch.Start : CilMatch.None;
+        yield return (instruction =>
+        {
+            if (instruction.OpCode != CilOpCodes.Callvirt ||
+                instruction.Operand is not IMethodDescriptor methodDescriptor)
+                return CilMatch.None;
+            
+            return methodDescriptor.Name == "get_lineIndex" ? CilMatch.End : CilMatch.None;
+        });
+        yield return instruction => 
+            instruction.OpCode == CilOpCodes.Ldelem_Ref ? CilMatch.Strict : CilMatch.None;
     }
 
-    public bool EndOffset(Instruction instructions)
+    public IEnumerable<CilInstruction> PatchTrampoline(IEnumerable<CilInstruction> instructions, TypeDefinition definition, CilLocalVariable instance,
+        ReferenceImporter importer)
     {
-        if (instructions.Operand is not FieldReference fieldRef)
-            return false;
+        var methodName = nameof(HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlicePatch.ClampValues);
+        var clampValueMethod = definition.Methods.FirstOrDefault(it => it.Name == methodName);
+
+        if (clampValueMethod is null)
+            throw new Exception($"Failed to find method of name: {methodName}");
+
+        var localValue = instructions.ToArray()[0].Operand;
         
-        return instructions.OpCode == OpCodes.Ldfld && fieldRef.Name.Contains("_standaloneSettingsApplicator");
+        yield return new CilInstruction(CilOpCodes.Ldloc, instance);
+        yield return new CilInstruction(CilOpCodes.Ldloc_S, localValue);
+        yield return new CilInstruction(CilOpCodes.Call, importer.ImportMethod(clampValueMethod));
     }
-
-    public IEnumerable<Instruction> PatchTrampoline(IEnumerable<Instruction> instructions, TypeDefinition definition, VariableDefinition instance)
-    {
-        var typeDef = instance.VariableType.Resolve();
-        foreach (var method in typeDef.Methods)
-        {
-            Console.WriteLine(method.Name);
-        }
-        var methodToCall = typeDef.Methods.First(it => it.Name.Contains("PatchApplicator"));
-        var methodToCallRef = definition.Module.ImportReference(methodToCall);
-        foreach (var instruction in instructions)
-        {
-            if (instruction.OpCode == OpCodes.Ldarg_0)
-            {
-                yield return Instruction.Create(OpCodes.Ldloc, instance);
-                yield return instruction;
-            }
-            else if (instruction.OpCode == OpCodes.Ldfld)
-            {
-                yield return Instruction.Create(OpCodes.Call, methodToCallRef);
-            }
-        }
-    }
-
-    public int Matches => 1;
 }
 ```
 
 ### For runtime
 
 ```csharp
+using System;
 using CrossAccord.Common.Interfaces;
 
-namespace BeatSaberQuestPatch.Patches.Trampoline;
+namespace MappingExtensions.Patches.Trampoline;
 
-public class BeatSaberInitTrampoline : IAccordTrampolinePatch<BeatSaberInitTrampoline>
+public class HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlicePatch : IAccordTrampolinePatch<BeatmapObjectSpawnMovementDataGetObstacleSpawnDataPatch>
 {
-    public static BeatSaberInitTrampoline Instance { get; set; } = null;
-    
-    public SettingsApplicatorSO PatchApplicator(BeatSaberInit instance)
+    public static HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlicePatch Instance
     {
-        return instance._questSettingsApplicator;
+        get;
+        set;
+    } = null;
+
+    public int ClampValues(NoteData noteData)
+    {
+        return Math.Clamp(noteData.lineIndex, 0, 3);
     }
 }
 ```
