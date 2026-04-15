@@ -18,60 +18,27 @@ using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.PE.DotNet.Cil;
-using CrossAccord.ILTrampoline.Attributes;
-using CrossAccord.ILTrampoline.Interfaces;
-using MappingExtensions.Patches.Trampoline;
+using BeatSaberQuestPatch.Patches.Trampoline;
+using Accord.ILTrampoline.Attributes;
+using Accord.ILTrampoline.Interfaces;
 
-namespace MappingExtensions.Build;
+namespace BeatSaberQuestPatch.Build;
 
-[AccordTrampolineBuild(
-    declaringType: typeof(BeatmapObjectsInTimeRowProcessor), 
-    methodName: nameof(BeatmapObjectsInTimeRowProcessor.HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlice), 
-    arguments: [typeof(BeatmapObjectsInTimeRowProcessor.TimeSliceContainer<BeatmapDataItem>), typeof(float)], 
-    trampolinePatch: typeof(HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlicePatch))
-]
-public class HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlicePatchBuild : IAccordTrampolineBuild
+[AccordTrampolineBuild(typeof(BeatSaberInit), "get_settingsApplicator", [], typeof(BeatSaberInitTrampoline))]
+public class BeatSaberInitTrampolineBuild : IAccordTrampolineBuild
 {
     public IEnumerable<Func<CilInstruction, CilMatch>> MatchInstructions()
     {
-        yield return instruction => 
-            instruction.OpCode == CilOpCodes.Ldarg_0 ? CilMatch.Strict : CilMatch.None;
-        yield return (instruction =>
-        {
-            if (instruction.OpCode != CilOpCodes.Ldfld ||
-                instruction.Operand is not IFieldDescriptor fieldDescriptor)
-                return CilMatch.None;
-            
-            return fieldDescriptor.Name == "_notesInColumnsReusableProcessingListOfLists" ? CilMatch.Strict : CilMatch.None;
-        });
-        yield return instruction => 
-            instruction.OpCode == CilOpCodes.Ldloc_S ? CilMatch.Start : CilMatch.None;
-        yield return (instruction =>
-        {
-            if (instruction.OpCode != CilOpCodes.Callvirt ||
-                instruction.Operand is not IMethodDescriptor methodDescriptor)
-                return CilMatch.None;
-            
-            return methodDescriptor.Name == "get_lineIndex" ? CilMatch.End : CilMatch.None;
-        });
-        yield return instruction => 
-            instruction.OpCode == CilOpCodes.Ldelem_Ref ? CilMatch.Strict : CilMatch.None;
+        yield return (instruction => instruction.OpCode == CilOpCodes.Ldarg_0 ? CilMatch.Start : CilMatch.None);
+        yield return (instruction => instruction.OpCode == CilOpCodes.Ldfld ? CilMatch.End : CilMatch.None);
     }
-
-    public IEnumerable<CilInstruction> PatchTrampoline(IEnumerable<CilInstruction> instructions, TypeDefinition definition, CilLocalVariable instance,
-        ReferenceImporter importer)
+    
+    public IEnumerable<CilInstruction> PatchTrampoline(IEnumerable<CilInstruction> instructions,
+        TypeDefinition definition, CilLocalVariable instance, ReferenceImporter importer)
     {
-        var methodName = nameof(HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlicePatch.ClampValues);
-        var clampValueMethod = definition.Methods.FirstOrDefault(it => it.Name == methodName);
-
-        if (clampValueMethod is null)
-            throw new Exception($"Failed to find method of name: {methodName}");
-
-        var localValue = instructions.ToArray()[0].Operand;
-        
         yield return new CilInstruction(CilOpCodes.Ldloc, instance);
-        yield return new CilInstruction(CilOpCodes.Ldloc_S, localValue);
-        yield return new CilInstruction(CilOpCodes.Call, importer.ImportMethod(clampValueMethod));
+        yield return new CilInstruction(CilOpCodes.Ldarg_0);
+        yield return new CilInstruction(CilOpCodes.Call, importer.ImportMethod(definition.Methods.FirstOrDefault(it => it.Name == nameof(BeatSaberInitTrampoline.PatchApplicator))));
     }
 }
 ```
@@ -79,22 +46,17 @@ public class HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlicePatchBuil
 ### For runtime
 
 ```csharp
-using System;
-using CrossAccord.Common.Interfaces;
+using Accord.Common.Interfaces;
 
-namespace MappingExtensions.Patches.Trampoline;
+namespace BeatSaberQuestPatch.Patches.Trampoline;
 
-public class HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlicePatch : IAccordTrampolinePatch<BeatmapObjectSpawnMovementDataGetObstacleSpawnDataPatch>
+public class BeatSaberInitTrampoline : IAccordTrampolinePatch<BeatSaberInitTrampoline>
 {
-    public static HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlicePatch Instance
+    public static BeatSaberInitTrampoline Instance { get; set; } = null;
+    
+    public SettingsApplicatorSO PatchApplicator(BeatSaberInit instance)
     {
-        get;
-        set;
-    } = null;
-
-    public int ClampValues(NoteData noteData)
-    {
-        return Math.Clamp(noteData.lineIndex, 0, 3);
+        return instance._questSettingsApplicator;
     }
 }
 ```

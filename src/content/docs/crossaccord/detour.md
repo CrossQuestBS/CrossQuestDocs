@@ -15,32 +15,42 @@ It is also possible to prevent original method from running.
 ```csharp
 namespace BeatSaberQuestPatch.Patches;
 
-[AccordPatch(typeof(SinglePlayerLevelSelectionFlowCoordinator), "get_enableCustomLevels")]
+[AccordPatch(
+    declaringType: typeof(MainEffectCore), 
+    methodName: "SetGlobalShaderValues", 
+    arguments: [typeof(float), typeof(float)])
+]
 [AccordPrefix]
-public partial class EnableCustomSongsPatch
+public partial class MainEffectPatch
 {
+    private static readonly int QuestWhiteboostMultiplier = Shader.PropertyToID("_QuestWhiteboostMultiplier");
+    private static readonly int BloomMultiplier = Shader.PropertyToID("_BloomMultiplier");
 
-    public EnableCustomSongsPatch()
+    public MainEffectPatch()
     {
         Patch();
     }
-    
-    public MemberInfo MemberMethod => typeof(SinglePlayerLevelSelectionFlowCoordinator).GetMember("get_enableCustomLevels", (global::System.Reflection.BindingFlags)~0).FirstOrDefault()!;
 
-    public bool Prefix(SinglePlayerLevelSelectionFlowCoordinator instance, ref bool returnValue)
+    public bool Prefix(ref float arg1, ref float arg2)
     {
-        returnValue = true;
-        return false;
+        Shader.SetGlobalFloat(QuestWhiteboostMultiplier, 0.0f);
+        Shader.SetGlobalFloat(BloomMultiplier, 0.0f);
+        arg1 = 0.0f;
+        arg2 = 0.0f;
+        return true;
     }
 }
 ```
 
-### Prefix
+### Postfix
 
 ```csharp
 namespace BeatSaberQuestPatch.Patches
 {
-    [AccordPatch(typeof(MainMenuViewController), "DidActivate")]
+    [AccordPatch(
+        declaringType: typeof(MainMenuViewController), 
+        methodName: "DidActivate",
+        arguments: [])]
     [AccordPostfix]
     public partial class DisableEditorButton : IDisposable
     {
@@ -61,8 +71,6 @@ namespace BeatSaberQuestPatch.Patches
         {
             Unpatch();
         }
-        
-        public MemberInfo MemberMethod { get; } = typeof(MainMenuViewController).GetMember("DidActivate", (global::System.Reflection.BindingFlags)~0).FirstOrDefault()!;
     }
 }
 ```
