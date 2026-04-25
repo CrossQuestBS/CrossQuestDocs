@@ -1,6 +1,6 @@
 ---
 title: Developing mods
-description: A guide in my new Starlight docs site.
+description: How to development mods for CrossQuest!
 ---
 
 ## Modding
@@ -9,7 +9,7 @@ description: A guide in my new Starlight docs site.
 
 Modding with CrossQuest is close to PC BSIPA, but with a few changes.
 
-Instead of using [HarmonyX](https://github.com/BepInEx/HarmonyX?tab=readme-ov-file) we use [Accord](https://github.com/CrossQuestBS/Accord/tree/main). Instead of patching game code at runtime, it happens directly on the IL code.
+Instead of using [HarmonyX](https://github.com/BepInEx/HarmonyX?tab=readme-ov-file) we use [Accord](https://github.com/CrossQuestBS/Accord/tree/main). Instead of patching game code at runtime, it happens directly on the IL code Ahead-of-time.
 
 Accord relies on [C# source generators](https://devblogs.microsoft.com/dotnet/introducing-c-source-generators/) and attributes.
 
