@@ -24,10 +24,6 @@ export default defineConfig({
                 label: 'Technical',
                 autogenerate: { directory: 'tech' },
             },
-            {
-                label: 'CrossAccord',
-                autogenerate: { directory: 'crossaccord' },
-            }
         ],
 		})],
 });
