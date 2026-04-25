@@ -17,17 +17,17 @@ export default defineConfig({
                 autogenerate: { directory: 'introduction' },
             },
             {
+                label: 'CLI',
+                autogenerate: { directory: 'cli' },
+            },
+            {
                 label: 'Technical',
                 autogenerate: { directory: 'tech' },
             },
             {
                 label: 'CrossAccord',
                 autogenerate: { directory: 'crossaccord' },
-            },
-            {
-                label: 'CLI',
-                autogenerate: { directory: 'cli' },
-            },
+            }
         ],
 		})],
 });

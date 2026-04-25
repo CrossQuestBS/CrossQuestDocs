@@ -1,5 +1,5 @@
 ---
-title: How to use!
+title: Setup
 description: A guide in my new Starlight docs site.
 ---
 
@@ -24,6 +24,11 @@ If you are unsure how, you can check out [Guide to obtain your Oculus Token](htt
 crossquest games install com.beatgames.beatsaber 1.42.3 -t "OC_TOKEN_HERE"
 ```
 
+
+### How to add mods
+
+There are a few mods required
+
 ### Compiling
 
 To compile and build apk run the following 
@@ -36,6 +41,4 @@ If you also want to deploy modded apk to device run
 ```sh
 crossquest games compile -b -d
 ```
-
-
 
