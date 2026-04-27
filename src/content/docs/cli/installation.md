@@ -6,8 +6,10 @@ description: Example
 ## Prerequisite
 
 :::note
-**The game has to been downloaded atleast once on PC and Quest.**  
-We are trying to find the endpoint to automate this.
+**If you have previously not installed PC version**  
+1. Go to https://www.meta.com/en-gb/experiences/pcvr/beat-saber/1304877726278670/  
+2. Login with Meta account owning Beat Saber on Quest
+3. Press "Get" button to redeem the game on PC.
 :::
 
 You need to have the following installed
