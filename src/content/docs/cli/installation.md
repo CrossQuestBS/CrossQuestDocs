@@ -5,6 +5,11 @@ description: Example
 
 ## Prerequisite
 
+:::note
+**The game has to been downloaded atleast once on PC and Quest.**  
+We are trying to find the endpoint to automate this.
+:::
+
 You need to have the following installed
 * Java JDK
 * .NET Runtime 10 (?)
